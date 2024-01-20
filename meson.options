@@ -77,7 +77,7 @@ option(
 option(
   'gallium-drivers',
   type : 'array',
-  value : ['auto'],
+  value : ['d3d12'],
   choices : [
     'all', 'auto',
     'asahi', 'crocus', 'd3d12', 'etnaviv', 'freedreno', 'i915', 'iris',
@@ -204,7 +204,7 @@ option(
 option(
   'vulkan-drivers',
   type : 'array',
-  value : ['auto'],
+  value : ['microsoft-experimental'],
   choices : ['auto', 'amd', 'broadcom', 'freedreno', 'intel', 'intel_hasvk',
              'panfrost', 'swrast', 'virtio', 'imagination-experimental',
              'microsoft-experimental', 'nouveau', 'asahi', 'gfxstream',
@@ -221,7 +221,7 @@ option(
   'freedreno-kmds',
   type : 'array',
   value : ['msm'],
-  choices : ['msm', 'kgsl', 'virtio', 'wsl'],
+  choices : ['msm', 'kgsl', 'virtio'],
   description : 'List of kernel-mode drivers to enable for freedreno ' +
                 'gallium and vulkan driver',
 )
@@ -349,7 +349,7 @@ option(
 option(
   'glx',
   type : 'combo',
-  value : 'auto',
+  value : 'disabled',
   choices : ['auto', 'disabled', 'dri', 'xlib'],
   description : 'Build support for GLX platform'
 )
@@ -535,7 +535,7 @@ option(
 option(
   'tools',
   type : 'array',
-  value : [],
+  value : ['glsl'],
   choices : ['drm-shim', 'etnaviv', 'freedreno', 'glsl', 'intel', 'intel-ui',
              'nir', 'nouveau', 'lima', 'panfrost', 'asahi', 'imagination',
              'all', 'dlclose-skip'],
@@ -715,7 +715,7 @@ option(
 option(
   'video-codecs',
   type : 'array',
-  value : ['all_free'],
+  value : [],
   choices: [
     'all', 'all_free', 'vc1dec', 'h264dec', 'h264enc', 'h265dec', 'h265enc', 'av1dec', 'av1enc', 'vp9dec'
   ],
