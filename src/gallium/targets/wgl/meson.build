@@ -13,14 +13,14 @@ wgl_def = custom_target(
 gallium_wgl_name = get_option('gallium-wgl-dll-name')
 libgallium_wgl = shared_library(
   gallium_wgl_name,
-  ['wgl.c'],
+  ['wgl.c','dummy_uwp.cpp'],
   vs_module_defs : wgl_def,
   include_directories : [
     inc_include, inc_src, inc_mapi, inc_mesa, inc_gallium, inc_gallium_aux, inc_wgl, inc_gallium_winsys, inc_gallium_winsys_sw, inc_gallium_drivers,
   ],
-  link_whole : [libwgl],
+  link_whole : [libwgl, libgdi_uwp],
   link_with : [
-    libgallium, libglsl, libmesa, libwsgdi, libglapi_bridge, libglapi, libgalliumvl_stub,
+    libgallium, libglsl, libmesa, libwsgdi, libglapi_static, libglapi, libgalliumvl_stub, libgdi_uwp
   ],
   dependencies : [
     dep_ws2_32, idep_nir, idep_mesautil, driver_swrast,

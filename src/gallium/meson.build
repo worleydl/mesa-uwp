@@ -45,6 +45,11 @@ if with_platform_windows
 else
   libwsgdi = null_dep
 endif
+if with_uwp
+  subdir('winsys/uwp')
+else
+  libgdi_uwp = declare_dependency()
+endif  
 subdir('winsys/sw/wrapper')
 if with_platform_haiku
   subdir('winsys/sw/hgl')

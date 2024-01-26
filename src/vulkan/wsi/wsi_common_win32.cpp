@@ -55,7 +55,9 @@ struct wsi_win32 {
    VkPhysicalDevice physical_device;
    struct {
       IDXGIFactory4 *factory;
+#if !defined _XBOX_UWP
       IDCompositionDevice *dcomp;
+#endif
    } dxgi;
 };
 
@@ -90,8 +92,10 @@ struct wsi_win32_surface {
     * window will flash white. When the currently-bound swapchain is destroyed,
     * the visual's content is unset.
     */
+#if !defined _XBOX_UWP
    IDCompositionTarget *target;
    IDCompositionVisual *visual;
+#endif
    struct wsi_win32_swapchain *current_swapchain;
 };
 
@@ -149,11 +153,13 @@ wsi_win32_surface_destroy(VkIcdSurfaceBase *icd_surface, VkInstance _instance,
                           const VkAllocationCallbacks *pAllocator)
 {
    VK_FROM_HANDLE(vk_instance, instance, _instance);
+#if !defined _XBOX_UWP
    wsi_win32_surface *surface = (wsi_win32_surface *)icd_surface;
    if (surface->visual)
       surface->visual->Release();
    if (surface->target)
       surface->target->Release();
+#endif
    vk_free2(&instance->alloc, pAllocator, icd_surface);
 }
 
@@ -176,7 +182,7 @@ wsi_win32_surface_get_capabilities(VkIcdSurfaceBase *surf,
 #ifndef _XBOX_UWP
    VkIcdSurfaceWin32 *surface = (VkIcdSurfaceWin32 *)surf;
 #endif
-   RECT win_rect;
+   RECT win_rect = {0};
 #ifndef _XBOX_UWP
    if (!GetClientRect(surface->hwnd, &win_rect))
       return VK_ERROR_SURFACE_LOST_KHR;
@@ -557,7 +563,7 @@ wsi_win32_image_init(VkDevice device_h,
    SelectObject(image->sw.dc, bmp);
 #endif
 
-   BITMAP header;
+   BITMAP header = {0};
 #ifndef _XBOX_UWP
    int status = GetObject(bmp, sizeof(BITMAP), &header);
    (void)status;
@@ -710,8 +716,10 @@ wsi_win32_queue_present_dxgi(struct wsi_win32_swapchain *chain,
    }
 
    if (chain->surface->current_swapchain != chain) {
+#if !defined _XBOX_UWP
       chain->surface->visual->SetContent(chain->dxgi);
       chain->wsi->dxgi.dcomp->Commit();
+#endif
       chain->surface->current_swapchain = chain;
    }
 
@@ -809,7 +817,7 @@ wsi_win32_surface_create_swapchain_dxgi(
       return VK_ERROR_INITIALIZATION_FAILED;
 
    swapchain1->Release();
-
+#if !defined _XBOX_UWP
    if (!surface->target &&
        FAILED(wsi->dxgi.dcomp->CreateTargetForHwnd(surface->base.hwnd, false, &surface->target)))
       return VK_ERROR_INITIALIZATION_FAILED;
@@ -820,9 +828,9 @@ wsi_win32_surface_create_swapchain_dxgi(
           FAILED(surface->visual->SetContent(chain->dxgi)) ||
           FAILED(wsi->dxgi.dcomp->Commit()))
          return VK_ERROR_INITIALIZATION_FAILED;
-
       surface->current_swapchain = chain;
    }
+#endif
    return VK_SUCCESS;
 }
 
@@ -861,7 +869,9 @@ wsi_win32_surface_create_swapchain(
    };
 
    bool supports_dxgi = wsi->dxgi.factory &&
+#ifndef _XBOX_UWP
                         wsi->dxgi.dcomp &&
+#endif
                         wsi->wsi->win32.get_d3d12_command_queue;
    struct wsi_base_image_params *image_params = supports_dxgi ?
       &dxgi_image_params.base : &cpu_image_params.base;
@@ -908,11 +918,14 @@ wsi_win32_surface_create_swapchain(
    return VK_SUCCESS;
 
 fail:
+
+#ifndef _XBOX_UWP
    if (surface->visual) {
       surface->visual->SetContent(NULL);
       surface->current_swapchain = NULL;
       wsi->dxgi.dcomp->Commit();
    }
+#endif
    wsi_win32_swapchain_destroy(&chain->base, allocator);
    return result;
 }
@@ -946,6 +959,7 @@ dxgi_get_factory(bool debug)
    return factory;
 }
 
+#ifndef _XBOX_UWP
 static IDCompositionDevice *
 dcomp_get_device()
 {
@@ -970,6 +984,7 @@ dcomp_get_device()
 
    return device;
 }
+#endif
 
 VkResult
 wsi_win32_init_wsi(struct wsi_device *wsi_device,
@@ -997,6 +1012,7 @@ wsi_win32_init_wsi(struct wsi_device *wsi_device,
          result = VK_ERROR_INITIALIZATION_FAILED;
          goto fail;
       }
+#ifndef _XBOX_UWP
       wsi->dxgi.dcomp = dcomp_get_device();
       if (!wsi->dxgi.dcomp) {
          wsi->dxgi.factory->Release();
@@ -1004,6 +1020,7 @@ wsi_win32_init_wsi(struct wsi_device *wsi_device,
          result = VK_ERROR_INITIALIZATION_FAILED;
          goto fail;
       }
+#endif
    }
 
    wsi->base.get_support = wsi_win32_surface_get_support;
@@ -1035,8 +1052,10 @@ wsi_win32_finish_wsi(struct wsi_device *wsi_device,
 
    if (wsi->dxgi.factory)
       wsi->dxgi.factory->Release();
+#ifndef _XBOX_UWP
    if (wsi->dxgi.dcomp)
       wsi->dxgi.dcomp->Release();
+#endif
 
    vk_free(alloc, wsi);
 }
