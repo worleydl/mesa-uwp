@@ -77,7 +77,7 @@ option(
 option(
   'gallium-drivers',
   type : 'array',
-  value : ['d3d12'],
+  value : ['d3d12','swrast'],
   choices : [
     'all', 'auto',
     'asahi', 'crocus', 'd3d12', 'etnaviv', 'freedreno', 'i915', 'iris',
@@ -313,6 +313,7 @@ option(
 option(
   'gles2',
   type : 'feature',
+  value : 'enabled',
   deprecated: {'true': 'enabled', 'false': 'disabled'},
   description : 'Build support for OpenGL ES 2.x and 3.x'
 )
@@ -357,6 +358,7 @@ option(
 option(
   'egl',
   type : 'feature',
+  value : 'enabled',
   deprecated: {'true': 'enabled', 'false': 'disabled'},
   description : 'Build support for EGL platform'
 )
