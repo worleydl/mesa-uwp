@@ -410,9 +410,13 @@ d3d12_init_screen_caps(struct d3d12_screen *screen)
     * if an app just creates, initializes, and destroys resources without explicitly flushing. */
    caps->max_texture_upload_memory_budget = 64 * 1024 * 1024;
 
+#ifdef _XBOX_UWP
+   caps->sampler_view_target = true;
+#else
    caps->sampler_view_target = screen->opts12.RelaxedFormatCastingSupported;
+#endif
 
-#ifndef _GAMING_XBOX
+#if !defined(_GAMING_XBOX) && !defined(XBOX_UWP)
    caps->query_memory_info = true;
 #endif
 
