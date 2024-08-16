@@ -38,7 +38,7 @@ lower_point_size_intrin(nir_builder *b, nir_intrinsic_instr *intr, void *data)
    float *minmax = (float *)data;
 
    gl_varying_slot location = VARYING_SLOT_MAX;
-   nir_src *psiz_src;
+   nir_src *psiz_src = 0; // DLW: UWP build complained about no init
 
    if (intr->intrinsic == nir_intrinsic_store_deref) {
       nir_deref_instr *deref = nir_src_as_deref(intr->src[0]);

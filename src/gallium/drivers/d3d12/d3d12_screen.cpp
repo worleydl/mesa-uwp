@@ -1359,7 +1359,7 @@ try_find_d3d12core_next_to_self(char *path, DWORD path_arr_size)
 static ID3D12DeviceFactory *
 try_create_device_factory(util_dl_library *d3d12_mod)
 {
-#if defined(_WIN32) && defined(_WIN64)
+#if defined(_WIN32) && defined(_WIN64) && !defined(_XBOX_UWP)
    if (d3d12_debug & D3D12_DEBUG_PIX) {
       if (GetModuleHandleW(L"WinPixGpuCapturer.dll") == nullptr) {
          LPWSTR program_files_path = nullptr;

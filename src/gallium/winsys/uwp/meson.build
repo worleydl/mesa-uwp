@@ -26,6 +26,7 @@ libgdi_uwp = static_library(
     inc_gallium_winsys
   ],
   cpp_args : '/ZW',
+  dependencies: idep_mesautil,
 )
 
 install_headers('uwpgdi.h', 'uwpgdi.h')
