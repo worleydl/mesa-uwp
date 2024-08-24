@@ -187,13 +187,25 @@ int WINAPI GetPixelFormat(HDC hdc)
       {
          const struct stw_pixelformat_info * info = stw_pixelformat_get_info(iPixelFormat);
 
-         //Initialize to DXGI_FORMAT_B8G8R8A8_UNORM
-         if (info && 
-            info->stvis.color_format == PIPE_FORMAT_B8G8R8A8_UNORM &&
+#ifdef UWP_HDR
+         //Initialize to DXGI_FORMAT_R10G10B10A2_UNORM
+         if (info &&
+            info->stvis.color_format == PIPE_FORMAT_R10G10B10A2_UNORM &&
+            info->pfd.cStencilBits > 0 &&
             info->pfd.dwFlags & PFD_DOUBLEBUFFER)
          {
             break;
          }
+#else
+         //Initialize to DXGI_FORMAT_B8G8R8A8_UNORM
+         if (info && 
+            info->stvis.color_format == PIPE_FORMAT_B8G8R8A8_UNORM &&
+            info->pfd.cStencilBits > 0 &&
+            info->pfd.dwFlags & PFD_DOUBLEBUFFER)
+         {
+            break;
+         }
+#endif
       }
    }
    return iPixelFormat;

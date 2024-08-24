@@ -27,6 +27,7 @@
 
 #include <windows.h>
 #include <dxgi1_4.h>
+#include <dxgi1_5.h>
 #include <directx/d3d12.h>
 #include <wrl.h>
 #include <dxguids/dxguids.h>
@@ -136,6 +137,14 @@ d3d12_wgl_framebuffer_resize(stw_winsys_framebuffer *fb,
 
       swapchain1.As(&framebuffer->swapchain);
 
+#ifdef UWP_HDR
+      // Switch to HDR color mode
+      Microsoft::WRL::ComPtr<IDXGISwapChain4> swap_chain4;
+      swapchain1->QueryInterface(IID_PPV_ARGS(&swap_chain4));
+      //swap_chain4->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
+      swap_chain4->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709);
+#endif
+
 #ifndef _XBOX_UWP
       screen->factory->MakeWindowAssociation(framebuffer->window,
                                              DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN);
@@ -172,10 +181,15 @@ d3d12_wgl_framebuffer_present(stw_winsys_framebuffer *fb, int interval)
       return false;
    }
 
+#ifdef FORCE_VSYNC
+   // Vsync forced on for now
+   return S_OK == framebuffer->swapchain->Present(1, 0);
+#else
    if (interval < 1)
       return S_OK == framebuffer->swapchain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
    else
       return S_OK == framebuffer->swapchain->Present(interval, 0);
+#endif
 }
 
 static struct pipe_resource *
