@@ -26,11 +26,51 @@ using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 
 static int iPixelFormat = 0;
+static CoreWindow^ _uwpCoreWind = nullptr;
+static Windows::Graphics::Display::DisplayInformation^ _uwpDisplayInfo = nullptr;
+static Windows::Graphics::Display::Core::HdmiDisplayInformation^ _uwpHdi = nullptr;
+static Windows::Graphics::Display::Core::HdmiDisplayMode^ _uwpHdm = nullptr;
 
 inline float ConvertDipsToPixels(float dips, float dpi)
 {
    static const float dipsPerInch = 96.0f;
    return floorf(dips * dpi / dipsPerInch + 0.5f); // Arrotonda all'intero più vicino.
+}
+
+CoreWindow^ uwp_get_corewindow()
+{
+   if (!_uwpCoreWind) {
+      _uwpCoreWind = CoreWindow::GetForCurrentThread();
+   }
+
+   return _uwpCoreWind;
+}
+
+Windows::Graphics::Display::Core::HdmiDisplayInformation^ uwp_get_hdi()
+{
+   if (!_uwpHdi) {
+      _uwpHdi = Windows::Graphics::Display::Core::HdmiDisplayInformation::GetForCurrentView();
+   }
+
+   return _uwpHdi;
+}
+
+Windows::Graphics::Display::Core::HdmiDisplayMode^ uwp_get_hdm()
+{
+   if (!_uwpHdm) {
+      _uwpHdm = Windows::Graphics::Display::Core::HdmiDisplayInformation::GetForCurrentView()->GetCurrentDisplayMode();
+   }
+
+   return _uwpHdm;
+}
+
+Windows::Graphics::Display::DisplayInformation^ uwp_get_displayInfo()
+{
+   if (!_uwpDisplayInfo) {
+      _uwpDisplayInfo = Windows::Graphics::Display::DisplayInformation::GetForCurrentView();
+   }
+
+   return _uwpDisplayInfo;
 }
 
    bool is_running_on_xbox(void)
@@ -58,22 +98,22 @@ inline float ConvertDipsToPixels(float dips, float dpi)
                {
                if (is_running_on_xbox())
                {
-               const Windows::Graphics::Display::Core::HdmiDisplayInformation^ hdi = Windows::Graphics::Display::Core::HdmiDisplayInformation::GetForCurrentView();
+               const Windows::Graphics::Display::Core::HdmiDisplayInformation^ hdi = uwp_get_hdi();
                if (hdi)
-               ret = Windows::Graphics::Display::Core::HdmiDisplayInformation::GetForCurrentView()->GetCurrentDisplayMode()->ResolutionHeightInRawPixels;
+               ret = uwp_get_hdm()->ResolutionHeightInRawPixels;
                }
 
                if (ret == -1)
                {
-               const LONG32 resolution_scale = static_cast<LONG32>(Windows::Graphics::Display::DisplayInformation::GetForCurrentView()->ResolutionScale);
+               const LONG32 resolution_scale = static_cast<LONG32>(uwp_get_displayInfo()->ResolutionScale);
                surface_scale                 = static_cast<float>(resolution_scale) / 100.0f;
                ret                           = static_cast<LONG32>(
-                     CoreWindow::GetForCurrentThread()->Bounds.Height 
+                     uwp_get_corewindow()->Bounds.Height 
                      * surface_scale);
                }
                finished = true;
                }));
-      Windows::UI::Core::CoreWindow^ corewindow = Windows::UI::Core::CoreWindow::GetForCurrentThread();
+      Windows::UI::Core::CoreWindow^ corewindow = uwp_get_corewindow();
       while (!finished)
       {
          if (corewindow)
@@ -102,22 +142,22 @@ inline float ConvertDipsToPixels(float dips, float dpi)
                {
                if (is_running_on_xbox())
                {
-               const Windows::Graphics::Display::Core::HdmiDisplayInformation^ hdi = Windows::Graphics::Display::Core::HdmiDisplayInformation::GetForCurrentView();
+               const Windows::Graphics::Display::Core::HdmiDisplayInformation^ hdi = uwp_get_hdi();
                if (hdi)
-               returnValue = Windows::Graphics::Display::Core::HdmiDisplayInformation::GetForCurrentView()->GetCurrentDisplayMode()->ResolutionWidthInRawPixels;
+               returnValue = uwp_get_hdm()->ResolutionWidthInRawPixels;
                }
 
                if(returnValue == -1)
                {
-               const LONG32 resolution_scale = static_cast<LONG32>(Windows::Graphics::Display::DisplayInformation::GetForCurrentView()->ResolutionScale);
+               const LONG32 resolution_scale = static_cast<LONG32>(uwp_get_displayInfo()->ResolutionScale);
                surface_scale = static_cast<float>(resolution_scale) / 100.0f;
                returnValue   = static_cast<LONG32>(
-                     CoreWindow::GetForCurrentThread()->Bounds.Width 
+                     uwp_get_corewindow()->Bounds.Width 
                      * surface_scale);
                }
                finished = true;
                }));
-      Windows::UI::Core::CoreWindow^ corewindow = Windows::UI::Core::CoreWindow::GetForCurrentThread();
+      Windows::UI::Core::CoreWindow^ corewindow = uwp_get_corewindow();
       while (!finished)
       {
          if (corewindow)
@@ -132,8 +172,6 @@ BOOL WINAPI GetClientRect( _In_ HWND hWnd, _Out_ LPRECT lpRect)
 {
    if (nullptr != lpRect)
    {
-      CoreWindow^ coreWindow = CoreWindow::GetForCurrentThread();
-      DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
       lpRect->top = 0;
       lpRect->bottom = uwp_get_height();
       lpRect->left = 0;
@@ -150,7 +188,7 @@ WINAPI
 WindowFromDC(
    _In_ HDC hDC)
 {
-   CoreWindow^ coreWindow = CoreWindow::GetForCurrentThread();
+   CoreWindow^ coreWindow = uwp_get_corewindow(); 
    Platform::Agile<Windows::UI::Core::CoreWindow> m_window;
    m_window = coreWindow;
    return (HWND)reinterpret_cast<IUnknown*>(m_window.Get());
