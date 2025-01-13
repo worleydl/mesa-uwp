@@ -44,6 +44,9 @@
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"      // warning: cast to pointer from integer of different size
 #endif
 
+extern "C" __declspec(dllimport) void* uwp_GetWindowReference();
+//extern "C" __declspec(dllimport) void uwp_GetScreenSize(int *, int*);
+
 struct wsi_win32;
 
 struct wsi_win32 {
@@ -202,15 +205,27 @@ wsi_win32_surface_get_capabilities(VkIcdSurfaceBase *surf,
       caps->maxImageCount = 0;
    }
 
+#ifdef _XBOX_UWP
+   // TODO: Investigate failure of get screen size for some apps
+   //int uwp_x, uwp_y;
+   //uwp_GetScreenSize(&uwp_x, &uwp_y);
+
+   caps->currentExtent = {
+      (uint32_t) 3840, (uint32_t) 2160
+   };
+#else
    caps->currentExtent = {
       (uint32_t)win_rect.right - (uint32_t)win_rect.left,
       (uint32_t)win_rect.bottom - (uint32_t)win_rect.top
    };
+#endif
    caps->minImageExtent = { 1u, 1u };
    caps->maxImageExtent = {
       wsi_device->maxImageDimension2D,
       wsi_device->maxImageDimension2D,
    };
+
+
 
    caps->supportedTransforms = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
    caps->currentTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
@@ -812,9 +827,17 @@ wsi_win32_surface_create_swapchain_dxgi(
       desc.BufferUsage |= DXGI_USAGE_RENDER_TARGET_OUTPUT;
 
    IDXGISwapChain1 *swapchain1;
+#ifndef _XBOX_UWP
    if (FAILED(factory->CreateSwapChainForComposition(queue, &desc, NULL, &swapchain1)) ||
        FAILED(swapchain1->QueryInterface(&chain->dxgi)))
       return VK_ERROR_INITIALIZATION_FAILED;
+#else
+   if (FAILED(factory->CreateSwapChainForCoreWindow(queue, static_cast<IUnknown*>(uwp_GetWindowReference()), &desc, nullptr, &swapchain1)) ||
+       FAILED(swapchain1->QueryInterface(&chain->dxgi)))
+      return VK_ERROR_INITIALIZATION_FAILED;
+
+
+#endif
 
    swapchain1->Release();
 #if !defined _XBOX_UWP
@@ -830,6 +853,8 @@ wsi_win32_surface_create_swapchain_dxgi(
          return VK_ERROR_INITIALIZATION_FAILED;
       surface->current_swapchain = chain;
    }
+#else
+   surface->current_swapchain = chain;
 #endif
    return VK_SUCCESS;
 }

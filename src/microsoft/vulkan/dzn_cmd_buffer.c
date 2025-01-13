@@ -3237,10 +3237,13 @@ dzn_cmd_buffer_update_pipeline(struct dzn_cmd_buffer *cmdbuf, uint32_t bindpoint
       cmdbuf->state.pipeline = pipeline;
    }
 
+// Instance masks not supported on UWP driver at time of writing
+#ifndef _XBOX_UWP
    /* Deferring this until after the pipeline has been set due to an NVIDIA driver bug
     * when view instancing mask is set with no pipeline bound. */
    if (view_instance_mask)
       ID3D12GraphicsCommandList1_SetViewInstanceMask(cmdbuf->cmdlist, view_instance_mask);
+#endif
 }
 
 static void

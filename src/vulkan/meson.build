@@ -77,6 +77,12 @@ if with_platform_macos
   )
 endif
 
+# Add libuwp
+libuwp = declare_dependency(
+  link_args: [meson.source_root() + '\\uwp-dep\\libuwp.lib']
+)
+vulkan_wsi_deps += [libuwp]
+
 idep_vulkan_wsi_defines = declare_dependency(
   compile_args : vulkan_wsi_list,
   dependencies : vulkan_wsi_deps,
