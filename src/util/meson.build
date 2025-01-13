@@ -355,6 +355,29 @@ idep_parson = declare_dependency(
   link_with :  _libparson,
 )
 
+if with_uwp
+  files_uwp_util = [
+    'uwp_util.cpp',
+    'uwp_util.h'
+  ]
+
+  _libuwputil = static_library(
+    'uwputil',
+    files_uwp_util,
+    cpp_args : '/ZW',
+    dependencies: idep_mesautil
+  )
+
+  idep_uwputil = declare_dependency(
+    link_whole : _libuwputil,
+    link_with : _libuwputil,
+    link_args : ['/NODEFAULTLIB:msvcrt', '/NODEFAULTLIB:vccorlib'] # Maybe not needed I think link_whole is tho
+  )
+
+  install_headers('uwp_util.h')
+
+endif
+
 if with_tests
   # DRI_CONF macros use designated initializers (required for union
   # initializaiton), so we need c++2a since gtest forces us to use c++

@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "util/uwp_util.h"
 #include "vk_format.h"
 #include "vk_instance.h"
 #include "vk_physical_device.h"
@@ -43,9 +44,6 @@
 #if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"      // warning: cast to pointer from integer of different size
 #endif
-
-extern "C" __declspec(dllimport) void* uwp_GetWindowReference();
-//extern "C" __declspec(dllimport) void uwp_GetScreenSize(int *, int*);
 
 struct wsi_win32;
 
@@ -206,12 +204,8 @@ wsi_win32_surface_get_capabilities(VkIcdSurfaceBase *surf,
    }
 
 #ifdef _XBOX_UWP
-   // TODO: Investigate failure of get screen size for some apps
-   //int uwp_x, uwp_y;
-   //uwp_GetScreenSize(&uwp_x, &uwp_y);
-
    caps->currentExtent = {
-      (uint32_t) 3840, (uint32_t) 2160
+      (uint32_t) uwp_get_width(), (uint32_t) uwp_get_height()
    };
 #else
    caps->currentExtent = {
@@ -832,7 +826,7 @@ wsi_win32_surface_create_swapchain_dxgi(
        FAILED(swapchain1->QueryInterface(&chain->dxgi)))
       return VK_ERROR_INITIALIZATION_FAILED;
 #else
-   if (FAILED(factory->CreateSwapChainForCoreWindow(queue, static_cast<IUnknown*>(uwp_GetWindowReference()), &desc, nullptr, &swapchain1)) ||
+   if (FAILED(factory->CreateSwapChainForCoreWindow(queue, static_cast<IUnknown*>(uwp_get_window_reference()), &desc, nullptr, &swapchain1)) ||
        FAILED(swapchain1->QueryInterface(&chain->dxgi)))
       return VK_ERROR_INITIALIZATION_FAILED;
 
