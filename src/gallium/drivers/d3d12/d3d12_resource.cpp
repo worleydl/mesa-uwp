@@ -555,7 +555,7 @@ d3d12_resource_from_handle(struct pipe_screen *pscreen,
    HANDLE d3d_handle = (HANDLE) (intptr_t) handle->handle;
 #endif
 
-#ifndef _GAMING_XBOX
+#ifndef _GAMING_XBOX && !defined(_XBOX_UWP)
    if (handle->type == WINSYS_HANDLE_TYPE_D3D12_RES) {
       ComPtr<IUnknown> screen_device;
       ComPtr<IUnknown> res_device;
