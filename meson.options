@@ -77,7 +77,7 @@ option(
 option(
   'gallium-drivers',
   type : 'array',
-  value : ['d3d12','swrast'],
+  value : ['d3d12'],
   choices : [
     'all', 'auto',
     'asahi', 'crocus', 'd3d12', 'etnaviv', 'freedreno', 'i915', 'iris',

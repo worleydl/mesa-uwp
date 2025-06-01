@@ -113,9 +113,6 @@ wgl_screen_create_by_name(HDC hDC, const char* driver, struct sw_winsys *winsys)
    return screen;
 }
 
-struct sw_winsys*
-   gdi_create_sw_winsys(void);
-
 static struct pipe_screen *
 wgl_screen_create(HDC hDC)
 {
