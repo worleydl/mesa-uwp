@@ -394,6 +394,7 @@ option(
 option(
   'llvm',
   type : 'feature',
+  value: 'disabled',
   deprecated: {'true': 'enabled', 'false': 'disabled'},
   description : 'Build with LLVM support.'
 )
