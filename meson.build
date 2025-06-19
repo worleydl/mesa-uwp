@@ -90,6 +90,20 @@ with_vulkan_screenshot_layer = get_option('vulkan-layers').contains('screenshot'
 with_vulkan_vram_report_limit_layer = get_option('vulkan-layers').contains('vram-report-limit')
 with_tools = get_option('tools')
 with_uwp = get_option('uwp')
+
+uwp_sdl = dependency('', required:false)
+option_uwp_sdl_bridge = get_option('uwp-sdl-bridge').enabled()
+
+if option_uwp_sdl_bridge
+  uwp_sdl_lib = cc.find_library('SDL2', dirs: meson.project_source_root() / 'uwp', required: true)
+  inc_uwp_sdl = include_directories('uwp/include')
+  uwp_sdl = declare_dependency(
+    include_directories: [inc_uwp_sdl],
+    dependencies: [uwp_sdl_lib]
+  )
+  add_project_arguments('-DSDL_BRIDGE', language: 'cpp')
+endif
+
 if with_tools.contains('all')
   with_tools = [
     'drm-shim',

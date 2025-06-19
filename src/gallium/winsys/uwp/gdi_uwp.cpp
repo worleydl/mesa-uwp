@@ -17,15 +17,35 @@
 
 #include "util/uwp_util.h"
 
+#ifdef SDL_BRIDGE
+#include "SDL.h"
+#endif
+
 static int iPixelFormat = 0;
 BOOL WINAPI GetClientRect( _In_ HWND hWnd, _Out_ LPRECT lpRect)
 {
    if (nullptr != lpRect)
    {
       lpRect->top = 0;
-      lpRect->bottom = uwp_get_height();
       lpRect->left = 0;
+   #ifndef SDL_BRIDGE
+      lpRect->bottom = uwp_get_height();
       lpRect->right = uwp_get_width();
+   #else
+      SDL_Window *sdl_win = SDL_GetLatestWindow();
+
+      if (sdl_win) {
+         int sdl_W, sdl_H;
+         SDL_GetWindowSize(sdl_win, &sdl_W, &sdl_H);
+
+         lpRect->bottom = sdl_H;
+         lpRect->right = sdl_W;
+      }
+      else {
+         lpRect->bottom = uwp_get_height();
+         lpRect->right = uwp_get_width();
+      }
+   #endif
       return TRUE;
    }
    return FALSE;
