@@ -101,6 +101,7 @@ d3d12_wgl_framebuffer_resize(stw_winsys_framebuffer *fb,
    DXGI_SWAP_CHAIN_DESC1 desc = {};
    desc.BufferCount = num_buffers;
    desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
+   desc.Scaling = DXGI_SCALING_STRETCH;
    desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
    desc.Format = d3d12_get_format(templ->format);
    desc.Width = templ->width0;
@@ -169,6 +170,39 @@ d3d12_wgl_framebuffer_resize(stw_winsys_framebuffer *fb,
       if (FAILED(framebuffer->swapchain->ResizeBuffers(num_buffers, desc.Width, desc.Height, desc.Format, desc.Flags))) {
          debug_printf("D3D12: failed to resize swapchain");
       }
+   }
+
+    for (uint32_t i = 0; i < num_buffers; ++i) {
+      ID3D12Resource *res;
+      framebuffer->swapchain->GetBuffer(i, IID_PPV_ARGS(&res));
+      if (!res)
+         continue;
+
+      struct winsys_handle handle;
+      memset(&handle, 0, sizeof(handle));
+      handle.type = WINSYS_HANDLE_TYPE_D3D12_RES;
+      handle.format = framebuffer->pformat;
+      handle.com_obj = res;
+
+      D3D12_RESOURCE_DESC res_desc = GetDesc(res);
+
+      struct pipe_resource templ;
+      memset(&templ, 0, sizeof(templ));
+      templ.target = PIPE_TEXTURE_2D;
+      templ.format = framebuffer->pformat;
+      templ.width0 = res_desc.Width;
+      templ.height0 = res_desc.Height;
+      templ.depth0 = 1;
+      templ.array_size = res_desc.DepthOrArraySize;
+      templ.nr_samples = res_desc.SampleDesc.Count;
+      templ.last_level = res_desc.MipLevels - 1;
+      templ.bind = PIPE_BIND_DISPLAY_TARGET | PIPE_BIND_RENDER_TARGET;
+      templ.usage = PIPE_USAGE_DEFAULT;
+      templ.flags = 0;
+
+      pipe_resource_reference(&framebuffer->buffers[i],
+                              screen->base.base.resource_from_handle(&screen->base.base, &templ, &handle,
+                                                                     PIPE_HANDLE_USAGE_FRAMEBUFFER_WRITE));
    }
 }
 
