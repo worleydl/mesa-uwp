@@ -215,15 +215,10 @@ d3d12_wgl_framebuffer_present(stw_winsys_framebuffer *fb, int interval)
       return false;
    }
 
-#ifdef FORCE_VSYNC
-   // Vsync forced on for now
-   return S_OK == framebuffer->swapchain->Present(1, 0);
-#else
    if (interval < 1)
       return S_OK == framebuffer->swapchain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
    else
       return S_OK == framebuffer->swapchain->Present(interval, 0);
-#endif
 }
 
 static struct pipe_resource *
