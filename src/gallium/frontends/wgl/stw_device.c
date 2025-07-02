@@ -282,8 +282,11 @@ stw_cleanup(void)
    st_screen_destroy(stw_dev->fscreen);
    FREE(stw_dev->fscreen);
 
+   // [UWP] Ugly hack: causes access violation on exit for some reason
+   #if 0
    if (stw_dev->screen)
       stw_dev->screen->destroy(stw_dev->screen);
+   #endif
 
    stw_tls_cleanup();
 
