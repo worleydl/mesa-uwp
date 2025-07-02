@@ -101,7 +101,7 @@ d3d12_wgl_framebuffer_resize(stw_winsys_framebuffer *fb,
    DXGI_SWAP_CHAIN_DESC1 desc = {};
    desc.BufferCount = num_buffers;
    desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
-   desc.Scaling = DXGI_SCALING_STRETCH;
+   desc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
    desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
    desc.Format = d3d12_get_format(templ->format);
    desc.Width = templ->width0;
