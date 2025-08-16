@@ -104,6 +104,17 @@ if option_uwp_sdl_bridge
   add_project_arguments('-DSDL_BRIDGE', language: 'cpp')
 endif
 
+uwp_libuwp = dependency('', required:false)
+option_libuwp_bridge = get_option('uwp-libuwp-bridge').enabled()
+
+if option_libuwp_bridge
+  libuwp_lib = cc.find_library('libuwp', dirs: meson.project_source_root() / 'uwp', required: true)
+  uwp_libuwp = declare_dependency(
+    dependencies: [libuwp_lib]
+  )
+  add_project_arguments('-DLIBUWP_BRIDGE', language: 'cpp')
+endif
+
 if with_tools.contains('all')
   with_tools = [
     'drm-shim',

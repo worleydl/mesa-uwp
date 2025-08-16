@@ -21,6 +21,10 @@
 #include "SDL.h"
 #endif
 
+#ifdef LIBUWP_BRIDGE
+extern "C" __declspec(dllimport) void uwp_GetScreenSize(int* x, int* y);
+#endif
+
 static int iPixelFormat = 0;
 BOOL WINAPI GetClientRect( _In_ HWND hWnd, _Out_ LPRECT lpRect)
 {
@@ -28,10 +32,7 @@ BOOL WINAPI GetClientRect( _In_ HWND hWnd, _Out_ LPRECT lpRect)
    {
       lpRect->top = 0;
       lpRect->left = 0;
-   #ifndef SDL_BRIDGE
-      lpRect->bottom = uwp_get_height();
-      lpRect->right = uwp_get_width();
-   #else
+   #ifdef SDL_BRIDGE
       SDL_Window *sdl_win = SDL_GetLatestWindow();
 
       if (sdl_win) {
@@ -45,6 +46,14 @@ BOOL WINAPI GetClientRect( _In_ HWND hWnd, _Out_ LPRECT lpRect)
          lpRect->bottom = uwp_get_height();
          lpRect->right = uwp_get_width();
       }
+   #elif LIBUWP_BRIDGE
+      int x, y;
+      uwp_GetScreenSize(&x, &y);
+      lpRect->bottom = y;
+      lpRect->right = x;
+   #else
+      lpRect->bottom = uwp_get_height();
+      lpRect->right = uwp_get_width();
    #endif
       return TRUE;
    }

@@ -14,6 +14,12 @@ option(
   description : 'Support lower framebuffer sizes using dimensions specified in SDL Window in mesa gallium'
 )
 option(
+  'uwp-libuwp-bridge',
+  type : 'feature',
+  value : 'disabled',
+  description : 'Support lower framebuffer sizes using dimensions requested via libuwp in mesa gallium'
+)
+option(
   'platforms',
   type : 'array',
   value : ['auto'],
