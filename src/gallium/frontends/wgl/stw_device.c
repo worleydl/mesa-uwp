@@ -46,6 +46,10 @@
 #include "stw_framebuffer.h"
 #include "stw_st.h"
 
+#ifdef LIBUWP_BRIDGE
+__declspec(dllimport) void* uwp_GetActualWindowReference();
+#endif
+
 
 struct stw_device *stw_dev = NULL;
 
@@ -281,7 +285,12 @@ stw_cleanup(void)
    st_screen_destroy(stw_dev->fscreen);
    FREE(stw_dev->fscreen);
 
+   #ifndef LIBUWP_BRIDGE
    if (stw_dev->screen)
+   #else
+   // HACK: Threaded rendering has trouble wrapping up, don't try destroying screen if we're not on main thread
+   if (stw_dev->screen && uwp_GetActualWindowReference())
+   #endif
       stw_dev->screen->destroy(stw_dev->screen);
 
    stw_tls_cleanup();

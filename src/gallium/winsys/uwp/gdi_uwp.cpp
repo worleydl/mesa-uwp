@@ -23,6 +23,7 @@
 
 #ifdef LIBUWP_BRIDGE
 extern "C" __declspec(dllimport) void uwp_GetScreenSize(int* x, int* y);
+extern "C" __declspec(dllimport) void* uwp_GetWindowReference();
 #endif
 
 static int iPixelFormat = 0;
@@ -67,7 +68,12 @@ WINAPI
 WindowFromDC(
    _In_ HDC hDC)
 {
+   #ifndef LIBUWP_BRIDGE
    return (HWND)reinterpret_cast<IUnknown*>(uwp_get_window_reference());
+   #else
+   // Use external impl so corewind can be cached and accessed from other threads
+   return (HWND)reinterpret_cast<IUnknown*>(uwp_GetWindowReference());
+   #endif
 }
 
 HDC

@@ -112,7 +112,7 @@ if option_libuwp_bridge
   uwp_libuwp = declare_dependency(
     dependencies: [libuwp_lib]
   )
-  add_project_arguments('-DLIBUWP_BRIDGE', language: 'cpp')
+  add_project_arguments('-DLIBUWP_BRIDGE', language: ['c', 'cpp'])
 endif
 
 if with_tools.contains('all')
